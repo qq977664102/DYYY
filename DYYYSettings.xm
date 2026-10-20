@@ -3437,6 +3437,14 @@ void showDYYYSettingsVC(UIViewController *rootVC, BOOL hasAgreed) {
             @"cellType" : @6,
             @"imageName" : @"ic_at_outlined_20"},
           @{
+              @"identifier" : @"DYYYBlockViewOnce",
+              @"title" : @"阻止仅看一次",
+              @"subTitle" : @"对方发来的仅看一次消息/媒体不再回报已消费",
+              @"detail" : @"",
+              @"cellType" : @37,
+              @"imageName" : @"ic_eyeslash_outlined_20"
+          },
+          @{
               @"identifier" : @"DYYYBioCopyText",
               @"title" : @"长按简介复制简介",
               @"subTitle" : @"长按个人主页的简介复制",

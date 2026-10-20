@@ -1849,6 +1849,24 @@
     [dataTask resume];
 }
 
+// 判断 URL 是否属于抖音系域名，用于过滤第三方解析接口塞进来的引流链接
+static BOOL DYYYIsTrustedMediaHost(NSString *urlString) {
+    if (urlString.length == 0) {
+        return NO;
+    }
+    NSString *host = [[NSURL URLWithString:urlString] host].lowercaseString;
+    if (host.length == 0) {
+        return NO;
+    }
+    NSArray<NSString *> *allowed = @[ @"douyin", @"iesdouyin", @"douyinvod", @"snssdk", @"bytedance", @"byteimg", @"amemv", @"pstatp" ];
+    for (NSString *keyword in allowed) {
+        if ([host containsString:keyword]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
 + (void)handleVideoData:(NSDictionary *)dataDict {
     // 首先检查videos和images数组
     NSArray *videoList = dataDict[@"video_list"];
@@ -1881,6 +1899,10 @@
         for (NSDictionary *videoDict in videoList) {
             NSString *url = videoDict[@"url"];
             NSString *level = videoDict[@"level"];
+            // 过滤第三方解析接口混入的非抖音域名（如 Telegram 引流广告）
+            if (!DYYYIsTrustedMediaHost(url)) {
+                continue;
+            }
             if (url.length > 0 && level.length > 0) {
                 AWEUserSheetAction *qualityAction = [NSClassFromString(@"AWEUserSheetAction") actionWithTitle:level
                                                                                                       imgName:nil

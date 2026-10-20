@@ -4818,7 +4818,8 @@ static BOOL isGestureActive = NO;
 %end
 
 // 强制启用保存他人头像
-%hook AFDProfileAvatarFunctionManager
+// 39.9.0 起该管理类由 AFDProfileAvatarFunctionManager 更名为 AWEProfileAvatarFunctionManager
+%hook AWEProfileAvatarFunctionManager
 - (BOOL)shouldShowSaveAvatarItem {
     BOOL shouldEnable = DYYYGetBool(@"DYYYEnableSaveAvatar");
     if (shouldEnable) {
@@ -9501,21 +9502,6 @@ static NSHashTable *processedParentViews = nil;
 }
 %end
 
-// 去除启动视频广告
-%hook AWEAwesomeSplashFeedCellOldAccessoryView
-
-// 在方法入口处添加控制逻辑
-- (id)ddExtraView {
-	if (DYYYGetBool(@"DYYYNoAds")) {
-		return NULL; // 返回空视图
-	}
-
-	// 正常模式调用原始方法
-	return %orig;
-}
-
-%end
-
 // 屏蔽青少年模式弹窗
 %hook AWETeenModeAlertView
 - (BOOL)show {
@@ -10091,11 +10077,6 @@ static NSHashTable *processedParentViews = nil;
 
 - (void)performCommentAction {
     %orig;
-    DYYYApplyAvatarFollowPromptSettingsWithRetry(self);
-}
-
-- (void)setIsCommentVCShowing:(BOOL)showing {
-    %orig(showing);
     DYYYApplyAvatarFollowPromptSettingsWithRetry(self);
 }
 
@@ -13092,6 +13073,25 @@ static void findTargetViewInView(UIView *view) {
             break;
     }
 }
+
+// 阻止「仅看一次」消息被标记为已消费（AWEIMWatchOnce* 两个类在 39.9.0 已核实存在）
+%hook AWEIMWatchOnceMessageManager
+- (void)readFinishWithWatchOnceMessages:(id)messages {
+    if (DYYYGetBool(@"DYYYBlockViewOnce")) {
+        return;   // 不回报已读，对方端收不到「已查看」
+    }
+    %orig(messages);
+}
+%end
+
+%hook AWEIMWatchOnceDataManager
+- (void)markMessageWatchOnceAlreadyConsume:(id)message messageArray:(id)array complete:(id)complete {
+    if (DYYYGetBool(@"DYYYBlockViewOnce")) {
+        return;
+    }
+    %orig(message, array, complete);
+}
+%end
 
 %ctor {
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{
