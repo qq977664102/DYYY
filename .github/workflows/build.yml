@@ -65,7 +65,7 @@ jobs:
   build:
     needs: changes
     if: needs.changes.outputs.should_build == 'true'
-    runs-on: macos-latest
+    runs-on: macos-14   # 原为 macos-latest；macos-latest 调度不到机器（job was not acquired），固定到具体版本
 
     steps:
       - uses: actions/checkout@v6
